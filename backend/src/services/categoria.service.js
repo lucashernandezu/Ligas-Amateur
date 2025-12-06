@@ -26,6 +26,15 @@ export class CategoriaService {
         return await CategoriaModel.create(nombre, descripcion);
     }
 
+    static async getById(id) {
+        if (!id) throw new Error("El id es obligatorio");
+
+        const categoria = await CategoriaModel.getById(id);
+        if (!categoria) throw new Error("La categoría no existe.");
+
+        return categoria;
+    }
+
     static async update(id, { nombre, descripcion }) {
         if (!id) throw new Error("El id es obligatorio");
 
@@ -34,8 +43,13 @@ export class CategoriaService {
         const existe = await CategoriaModel.getById(id);
         if (!existe) throw new Error("La categoría no existe.");
 
+        if (nombre.toLowerCase() !== existe.nombre.toLowerCase()) {
+            await this.checkDuplicate(nombre);
+        }
+
         return await CategoriaModel.update(id, nombre, descripcion);
     }
+
 
     static async delete(id) {
         if (!id) throw new Error("El id es obligatorio");
@@ -45,4 +59,5 @@ export class CategoriaService {
 
         return await CategoriaModel.delete(id);
     }
+
 }

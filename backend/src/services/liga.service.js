@@ -1,7 +1,7 @@
 import { LigaModel } from "../models/liga.model.js";
 import { CategoriaModel } from "../models/categoria.model.js";
 import { DeporteModel } from "../models/deporte.model.js";
-import { UsuarioModel } from "../models/usuario.model.js";
+
 
 export class LigaService {
 
