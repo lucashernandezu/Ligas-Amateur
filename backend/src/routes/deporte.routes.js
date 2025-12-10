@@ -4,9 +4,9 @@ import { DeporteController } from '../controllers/deporte.controller.js';
 const router = Router();
 
 router.get('/', DeporteController.getAll);
+router.get('/:id', DeporteController.getById);
 router.post('/', DeporteController.create);
-router.delete('/:id', DeporteController.delete);
 router.put('/:id', DeporteController.update);
-
+router.delete('/:id', DeporteController.delete);
 
 export default router;
