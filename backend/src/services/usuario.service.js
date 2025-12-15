@@ -29,7 +29,7 @@ export class UsuarioService {
         }
     }
 
-    static async register({ nombre, email, password, rol = 'organizador' }) {
+    static async register({ nombre, email, password, rol = 'admin' }) {
         this.validateRegistro({ nombre, email, password });
 
         const existeUsuario = await UsuarioModel.getByEmail(email);
