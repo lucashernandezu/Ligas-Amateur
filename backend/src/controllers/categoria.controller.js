@@ -37,9 +37,14 @@ export class CategoriaController {
                 data: categoria
             });
         } catch (error) {
-            res.status(400).json({ message: error.message });
+            if (error.message.includes("ya existe") ||
+                error.message.includes("debe tener")) {
+                return res.status(400).json({ message: error.message });
+            }
+            res.status(500).json({ message: error.message });
         }
     }
+
 
     static async update(req, res) {
         try {
@@ -73,8 +78,16 @@ export class CategoriaController {
             if (error.message.includes("no existe")) {
                 return res.status(404).json({ message: error.message });
             }
+
+            if (error.code === '23503') {
+                return res.status(409).json({
+                    message: 'No se puede eliminar la categoría porque tiene ligas asociadas'
+                });
+            }
+
             res.status(500).json({ message: error.message });
         }
     }
+
 
 }

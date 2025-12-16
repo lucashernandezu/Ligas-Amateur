@@ -83,9 +83,9 @@ export class UsuarioService {
 
     static generateToken(userId, rol) {
         return jwt.sign(
-            { userId, rol },                    
-            process.env.JWT_SECRET,             
-            { expiresIn: process.env.JWT_EXPIRES_IN || '7d' } 
+            { userId, rol },
+            process.env.JWT_SECRET,
+            { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
         );
     }
 
@@ -113,11 +113,29 @@ export class UsuarioService {
     static async update(id, data) {
         if (!id) throw new Error("El id es obligatorio");
 
+        if (!data.nombre && !data.email && data.rol === undefined && data.estado === undefined) {
+            throw new Error("Debes proporcionar al menos un campo para actualizar");
+        }
+
+        if (data.nombre && data.nombre.length < 2) {
+            throw new Error("El nombre debe tener al menos 2 caracteres");
+        }
+
+        if (data.email && !this.validateEmail(data.email)) {
+            throw new Error("Email inválido");
+        }
+
         const usuario = await UsuarioModel.getById(id);
         if (!usuario) throw new Error("El usuario no existe.");
 
+        if (data.email && data.email.toLowerCase() !== usuario.email.toLowerCase()) {
+            const existe = await UsuarioModel.getByEmail(data.email);
+            if (existe) throw new Error("El email ya está registrado");
+        }
+
         return await UsuarioModel.update(id, data);
     }
+
 
     static async delete(id) {
         if (!id) throw new Error("El id es obligatorio");

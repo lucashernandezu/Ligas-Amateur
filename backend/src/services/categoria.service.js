@@ -38,17 +38,27 @@ export class CategoriaService {
     static async update(id, { nombre, descripcion }) {
         if (!id) throw new Error("El id es obligatorio");
 
-        this.validateNombre(nombre);
+        if (!nombre && descripcion === undefined) {
+            throw new Error("Debes proporcionar al menos nombre o descripción");
+        }
+
+        if (nombre) {
+            this.validateNombre(nombre);
+        }
 
         const existe = await CategoriaModel.getById(id);
         if (!existe) throw new Error("La categoría no existe.");
 
-        if (nombre.toLowerCase() !== existe.nombre.toLowerCase()) {
+        if (nombre && nombre.toLowerCase() !== existe.nombre.toLowerCase()) {
             await this.checkDuplicate(nombre);
         }
 
-        return await CategoriaModel.update(id, nombre, descripcion);
+        const nombreFinal = nombre || existe.nombre;
+        const descripcionFinal = descripcion !== undefined ? descripcion : existe.descripcion;
+
+        return await CategoriaModel.update(id, nombreFinal, descripcionFinal);
     }
+
 
 
     static async delete(id) {
