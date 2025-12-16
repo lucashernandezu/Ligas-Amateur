@@ -13,7 +13,7 @@ export class DeporteModel {
 
     static async getByNombre(nombre) {
         const result = await pool.query(
-            'SELECT * FROM deportes WHERE LOWER(nombre) = LOWER($1)', 
+            'SELECT * FROM deportes WHERE LOWER(nombre) = LOWER($1)',
             [nombre]
         );
         return result.rows[0];
@@ -35,9 +35,11 @@ export class DeporteModel {
         return result.rows[0];
     }
 
+
+
     static async delete(id) {
         const result = await pool.query(
-            'DELETE FROM deportes WHERE id = $1 RETURNING *', 
+            'DELETE FROM deportes WHERE id = $1 RETURNING *',
             [id]
         );
         return result.rows[0];

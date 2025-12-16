@@ -6,7 +6,7 @@ export class UsuarioController {
   static async register(req, res) {
     try {
       const { usuario, token } = await UsuarioService.register(req.body);
-      
+
       res.status(201).json({
         message: "Usuario registrado exitosamente",
         data: {
@@ -16,8 +16,8 @@ export class UsuarioController {
       });
     } catch (error) {
       if (error.message.includes("ya está registrado") ||
-          error.message.includes("debe tener") ||
-          error.message.includes("inválido")) {
+        error.message.includes("debe tener") ||
+        error.message.includes("inválido")) {
         return res.status(400).json({ message: error.message });
       }
       res.status(500).json({ message: error.message });
@@ -28,7 +28,7 @@ export class UsuarioController {
   static async login(req, res) {
     try {
       const { usuario, token } = await UsuarioService.login(req.body);
-      
+
       res.status(200).json({
         message: "Login exitoso",
         data: {
@@ -38,8 +38,8 @@ export class UsuarioController {
       });
     } catch (error) {
       if (error.message.includes("Credenciales inválidas") ||
-          error.message.includes("desactivado") ||
-          error.message.includes("obligatorios")) {
+        error.message.includes("desactivado") ||
+        error.message.includes("obligatorios")) {
         return res.status(401).json({ message: error.message });
       }
       res.status(500).json({ message: error.message });
@@ -100,7 +100,15 @@ export class UsuarioController {
       if (error.message.includes("no existe")) {
         return res.status(404).json({ message: error.message });
       }
+
+      if (error.code === '23503') {
+        return res.status(409).json({
+          message: 'No se puede eliminar el usuario porque tiene ligas asociadas'
+        });
+      }
+
       res.status(500).json({ message: error.message });
     }
   }
+
 }

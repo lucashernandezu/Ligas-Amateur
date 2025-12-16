@@ -76,7 +76,15 @@ export class DeporteController {
       if (error.message.includes("no existe")) {
         return res.status(404).json({ message: error.message });
       }
+
+      if (error.code === '23503') {
+        return res.status(409).json({
+          message: 'No se puede eliminar el deporte porque tiene ligas asociadas'
+        });
+      }
+
       res.status(500).json({ message: error.message });
     }
   }
+
 }

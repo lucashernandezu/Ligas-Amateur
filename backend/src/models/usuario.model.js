@@ -25,7 +25,7 @@ export class UsuarioModel {
     return result.rows[0];
   }
 
-  static async create({ nombre, email, password, rol = 'organizador' }) {
+  static async create({ nombre, email, password, rol = 'admin' }) {
     const result = await pool.query(
       `INSERT INTO usuarios (nombre, email, password, rol)
        VALUES ($1, $2, $3, $4)

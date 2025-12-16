@@ -22,10 +22,10 @@ export class DeporteService {
 
   static async getById(id) {
     if (!id) throw new Error("El id es obligatorio");
-    
+
     const deporte = await DeporteModel.getById(id);
     if (!deporte) throw new Error("El deporte no existe.");
-    
+
     return deporte;
   }
 
@@ -36,25 +36,27 @@ export class DeporteService {
     return deporteCreado;
   }
 
-  static async update(id, { nombre }) {
-    if (!id) {
-        throw new Error('El id es obligatorio.');
+  static async update(id, data) {
+    if (!id) throw new Error('El id es obligatorio.');
+
+    if (!data.nombre) {
+      throw new Error('El nombre es obligatorio');
     }
 
-    this.validateNombre(nombre);
+    this.validateNombre(data.nombre);
 
     const deporte = await DeporteModel.getById(id);
-    if (!deporte) {
-        throw new Error('El deporte no existe.');
+    if (!deporte) throw new Error('El deporte no existe.');
+
+    if (data.nombre.toLowerCase() !== deporte.nombre.toLowerCase()) {
+      await this.checkDuplicate(data.nombre);
     }
 
-    if (nombre.toLowerCase() !== deporte.nombre.toLowerCase()) {
-        await this.checkDuplicate(nombre);
-    }
-
-    const deporteActualizado = await DeporteModel.update(id, nombre);
+    const deporteActualizado = await DeporteModel.update(id, data.nombre);
     return deporteActualizado;
   }
+
+
 
   static async delete(id) {
     if (!id) {
