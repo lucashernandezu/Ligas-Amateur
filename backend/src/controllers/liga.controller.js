@@ -67,7 +67,14 @@ export class LigaController {
 
   static async create(req, res) {
     try {
-      const liga = await LigaService.create(req.body);
+      const usuario_id = req.user.userId;
+      
+      const ligaData = {
+        ...req.body,
+        usuario_id
+      };
+      
+      const liga = await LigaService.create(ligaData);
       res.status(201).json({
         message: "Liga creada correctamente",
         data: liga
@@ -86,10 +93,20 @@ export class LigaController {
   static async update(req, res) {
     try {
       const { id } = req.params;
-      const liga = await LigaService.update(id, req.body);
+      const usuario_id = req.user.userId;
+      
+      const liga = await LigaService.getById(id);
+      
+      if (liga.usuario_id !== usuario_id) {
+        return res.status(403).json({ 
+          message: 'No tienes permiso para editar esta liga' 
+        });
+      }
+      
+      const ligaActualizada = await LigaService.update(id, req.body);
       res.status(200).json({
         message: "Liga actualizada correctamente",
-        data: liga
+        data: ligaActualizada
       });
     } catch (error) {
       if (error.message.includes("no existe") && error.message.includes("liga")) {
@@ -108,7 +125,17 @@ export class LigaController {
   static async delete(req, res) {
     try {
       const { id } = req.params;
-      const liga = await LigaService.delete(id);
+      const usuario_id = req.user.userId;
+      
+      const liga = await LigaService.getById(id);
+      
+      if (liga.usuario_id !== usuario_id) {
+        return res.status(403).json({ 
+          message: 'No tienes permiso para eliminar esta liga' 
+        });
+      }
+      
+      await LigaService.delete(id);
       res.status(200).json({
         message: "Liga eliminada correctamente",
         data: liga
@@ -117,6 +144,13 @@ export class LigaController {
       if (error.message.includes("no existe")) {
         return res.status(404).json({ message: error.message });
       }
+      
+      if (error.code === '23503') {
+        return res.status(409).json({ 
+          message: 'No se puede eliminar la liga porque tiene equipos o partidos asociados' 
+        });
+      }
+      
       res.status(500).json({ message: error.message });
     }
   }

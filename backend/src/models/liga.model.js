@@ -1,7 +1,7 @@
 import { pool } from "../config/db.js";
 
 export class LigaModel {
-  
+
   static async getAll() {
     const result = await pool.query('SELECT * FROM ligas ORDER BY created_at DESC');
     return result.rows;
@@ -9,7 +9,7 @@ export class LigaModel {
 
   static async getAllWithDetails() {
     const result = await pool.query(
-        `SELECT 
+      `SELECT 
             l.*,
             d.nombre as deporte_nombre,
             c.nombre as categoria_nombre,
@@ -33,7 +33,7 @@ export class LigaModel {
 
   static async getByIdWithDetails(id) {
     const result = await pool.query(
-        `SELECT 
+      `SELECT 
             l.*,
             d.nombre as deporte_nombre,
             c.nombre as categoria_nombre,
@@ -43,15 +43,15 @@ export class LigaModel {
          LEFT JOIN categorias c ON l.categoria_id = c.id
          INNER JOIN usuarios u ON l.usuario_id = u.id
          WHERE l.id = $1`,
-        [id]
+      [id]
     );
     return result.rows[0];
   }
 
   static async getByUsuario(usuario_id) {
     const result = await pool.query(
-        'SELECT * FROM ligas WHERE usuario_id = $1 ORDER BY created_at DESC',
-        [usuario_id]
+      'SELECT * FROM ligas WHERE usuario_id = $1 ORDER BY created_at DESC',
+      [usuario_id]
     );
     return result.rows;
   }
@@ -74,19 +74,43 @@ export class LigaModel {
     return result.rows[0];
   }
 
-  static async update(id, { nombre, descripcion, deporte_id, categoria_id }) {
+  static async update(id, data) {
+    const campos = [];
+    const valores = [];
+    let contador = 1;
+
+    if (data.nombre !== undefined) {
+      campos.push(`nombre = $${contador++}`);
+      valores.push(data.nombre);
+    }
+    if (data.descripcion !== undefined) {
+      campos.push(`descripcion = $${contador++}`);
+      valores.push(data.descripcion);
+    }
+    if (data.deporte_id !== undefined) {
+      campos.push(`deporte_id = $${contador++}`);
+      valores.push(data.deporte_id);
+    }
+    if (data.categoria_id !== undefined) {
+      campos.push(`categoria_id = $${contador++}`);
+      valores.push(data.categoria_id);
+    }
+
+    if (campos.length === 0) {
+      throw new Error('No hay campos para actualizar');
+    }
+
+    valores.push(id);
+
     const result = await pool.query(
-      `UPDATE ligas SET 
-        nombre = $1,
-        descripcion = $2,
-        deporte_id = $3,
-        categoria_id = $4
-       WHERE id = $5
-       RETURNING *`,
-      [nombre, descripcion, deporte_id, categoria_id, id]
+      `UPDATE ligas SET ${campos.join(', ')} 
+         WHERE id = $${contador}
+         RETURNING *`,
+      valores
     );
     return result.rows[0];
   }
+
 
   static async delete(id) {
     const result = await pool.query(

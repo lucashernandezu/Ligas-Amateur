@@ -72,30 +72,37 @@ export class LigaService {
   static async update(id, data) {
     if (!id) throw new Error("El id es obligatorio");
 
+    if (!data.nombre && data.descripcion === undefined &&
+      !data.deporte_id && !data.categoria_id) {
+      throw new Error("Debes proporcionar al menos un campo para actualizar");
+    }
+
     const liga = await LigaModel.getById(id);
     if (!liga) throw new Error("La liga no existe.");
 
-    const { nombre, descripcion, deporte_id, categoria_id } = data;
-
-    this.validateData({
-      nombre,
-      usuario_id: liga.usuario_id,
-      deporte_id,
-      categoria_id
-    });
-
-    if (nombre.toLowerCase() !== liga.nombre.toLowerCase()) {
-      await this.checkDuplicate(nombre);
+    if (data.nombre) {
+      if (data.nombre.length < 3) {
+        throw new Error("El nombre debe tener al menos 3 caracteres");
+      }
+      if (data.nombre.toLowerCase() !== liga.nombre.toLowerCase()) {
+        await this.checkDuplicate(data.nombre);
+      }
     }
 
-    await this.checkForeignKeys({
-      usuario_id: liga.usuario_id,
-      deporte_id,
-      categoria_id
-    });
+    if (data.deporte_id) {
+      const deporte = await DeporteModel.getById(data.deporte_id);
+      if (!deporte) throw new Error("El deporte no existe");
+    }
 
-    return await LigaModel.update(id, { nombre, descripcion, deporte_id, categoria_id });
+    if (data.categoria_id) {
+      const categoria = await CategoriaModel.getById(data.categoria_id);
+      if (!categoria) throw new Error("La categoría no existe");
+    }
+
+    return await LigaModel.update(id, data);
   }
+
+
 
   static async delete(id) {
     if (!id) throw new Error("El id es obligatorio");
